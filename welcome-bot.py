@@ -65,6 +65,8 @@ def index():
 		print ('real msg')
 		msg = getMsg(json_content['data']['id'])
 		email = json_content['data']['personEmail']
+		person = getPerson(Persons, email)
+		
 		print ('Create a container!')
 		sendMsg(person.email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
 
