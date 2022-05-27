@@ -13,7 +13,7 @@ app.debug = False
 port = int(os.environ.get("PORT", 5000))
 
 
-access_token = "MjBkMzc1MzQtYjIxMy00MWQ2LWFiODItNTJhYjQ1OTFlZWYzNzg4NWRkYzMtZDE4_PF84_1eb65fdf-9643-417f-9974-ad72cae0e10f"
+access_token = "M2FmNGNlZDItNDM3Yi00NGM2LTkxNjMtZjAwZGM2NzQ5NzczZjU2YWI5Y2MtNmYz_P0A1_16d45015-863d-4604-9bc8-b783b72ace5b"
 
 httpHeaders = {"Content-type" : "application/json", "Authorization" : "Bearer " + access_token}
 
@@ -188,9 +188,9 @@ def index():
 
 if __name__ == '__main__':
 
-	#url = runNgrok()
-	#print (url)
-	#createWebhook(sys.argv[1])
+	# url = runNgrok()
+	# print (url)
+	createWebhook(sys.argv[1])
 
 	app.run(host="0.0.0.0",port=port)
 
