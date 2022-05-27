@@ -30,36 +30,6 @@ def getPerson(Persons, email):
 
 	return None
 
-def createWebhook(url):
-	apiUrl = 'https://webexapis.com/v1/webhooks'
-	queryParams = {'name':'test', 'targetUrl':url, 'resource':'messages', 'event':'created'}
-	response = requests.post(url=apiUrl, json=queryParams, headers=httpHeaders)
-	print('Success!')
-	print (response.status_code)
-	print(response.text)
-
-def runNgrok():
-# 	p = subprocess.Popen('ngrok http 5000', shell=True, stderr=subprocess.PIPE)
-# 	print ('hi')
- 
-# ## But do not wait till netstat finish, start displaying output immediately ##
-# 	while True:
-# 		out = p.stderr.read(1)
-# 		if out == '' and p.poll() != None:
-# 			break
-# 		if out != '':
-# 			#sys.stdout.write(out)
-# 			print('!'+out)
-# 			#sys.stdout.flush()
-
-# 		if 'Forwarding' in out:
-# 			url = re.search('Forwarding\s*(http.*)\s->')
-# 			print (url)
-# 			break
-
-	public_url = ngrok.connect(5000,'http')
-	return (public_url)
-
 def sendMsg(to, msg):
 	global access_token, httpHeaders
 	apiUrl = "https://webexapis.com/v1/messages"
@@ -95,8 +65,7 @@ def index():
 		print ('real msg')
 		msg = getMsg(json_content['data']['id'])
 		email = json_content['data']['personEmail']
-
-		
+		print ('Create a container!')
 
 
 
@@ -108,7 +77,7 @@ if __name__ == '__main__':
 
 	# url = runNgrok()
 	# print (url)
-	createWebhook(sys.argv[1])
+	#createWebhook(sys.argv[1])
 
 	app.run(host="0.0.0.0",port=port)
 
