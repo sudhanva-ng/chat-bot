@@ -10,7 +10,7 @@ from pyngrok import ngrok
 
 app = Flask(__name__)
 app.debug = False
-port = int(os.environ.get("PORT", 5000))
+port = int(os.environ.get("PORT", 80))
 
 
 access_token = "M2FmNGNlZDItNDM3Yi00NGM2LTkxNjMtZjAwZGM2NzQ5NzczZjU2YWI5Y2MtNmYz_P0A1_16d45015-863d-4604-9bc8-b783b72ace5b"
