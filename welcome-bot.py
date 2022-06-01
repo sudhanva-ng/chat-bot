@@ -85,7 +85,7 @@ def index():
 		Persons.append(person)
 
 		print ('Create a container!')
-		print(person.email)
+
 		sendMsg(person.email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
 
 
@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
 	# url = runNgrok()
 	# print (url)
-	createWebhook(sys.argv[-1])
+	#createWebhook(sys.argv[-1])
 
 	app.run(host="0.0.0.0",port=port)
 
