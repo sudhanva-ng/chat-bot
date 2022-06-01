@@ -195,7 +195,7 @@ if __name__ == '__main__':
 
 	# url = runNgrok()
     # print (url)
-    createWebhook(sys.argv[1])
+    #createWebhook(sys.argv[1])
     app.run(host="0.0.0.0",port=port)
 
 
