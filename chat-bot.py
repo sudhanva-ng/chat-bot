@@ -73,7 +73,7 @@ def sendMsg(to, msg):
 	response = requests.post(url=apiUrl, json=queryParams, headers=httpHeaders)
 
 	print (response.status_code)
-	#print (response.text)
+	print (response.text)
 
 
 def getMsg(msgId):
@@ -92,7 +92,7 @@ def getQuestions():
 
 	Questions = []
 	url = 'https://opentdb.com/api.php'
-	param = {'amount': '1', 'type':'multiple', 'category':'17'}
+	param = {'amount': '5', 'type':'multiple', 'category':'17'}
 
 	response = requests.get(url=url, params=param)
 	out = json.loads(response.text)
