@@ -75,6 +75,10 @@ def sendMsg(to, msg):
 	print (response.status_code)
 	print (response.text)
 
+	if response.status_code == 400:
+		print(msg)
+
+
 
 def getMsg(msgId):
 	global access_token, httpHeaders
