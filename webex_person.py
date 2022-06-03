@@ -8,5 +8,7 @@ class webex_person:
 		self.msg = None
 		self.Questions = []
 		self.AskQues = 1
+		self.container = email.replace('@','.')
+		self.port = None
 
 

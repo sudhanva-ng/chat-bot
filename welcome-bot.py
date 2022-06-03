@@ -28,6 +28,7 @@ msg_thankYou = 'Thank you; your response has been recorded'
 
 
 Persons = []
+ports = list(range(3000,3100))
 
 def getPerson(Persons, email):
 	for items in Persons:
@@ -46,14 +47,6 @@ def sendMsg(to, msg):
 	print (response.status_code)
 	#print (response.text)
 
-def createWebhook(url):
-	apiUrl = 'https://webexapis.com/v1/webhooks'
-	queryParams = {'name':'test', 'targetUrl':url, 'resource':'messages', 'event':'created'}
-	response = requests.post(url=apiUrl, json=queryParams, headers=httpHeaders)
-	print('Success!')
-	print (response.status_code)
-	print(response.text)
-
 
 def getMsg(msgId):
 	global access_token, httpHeaders
@@ -67,10 +60,17 @@ def getMsg(msgId):
 		#print (type(out))
 		return(out['text'])
 
+def forwardApi(json_content, port):
+	apiUrl = "http://localhost:{}".format(port)
+	response = requests.post(url=apiUrl, json=json_content)
+
+def createContainer(port):
+	p = subprocess.Popen('sudo docker ', shell=True, stderr=subprocess.PIPE)
+
 
 @app.route('/', methods=['POST'])
 def index():
-	global   Persons
+	global   containers, ports
 	json_content = request.json
 
 	if json_content['data']['personEmail'] == 'sudng-quiz-bot@webex.bot':
@@ -80,13 +80,22 @@ def index():
 		msg = getMsg(json_content['data']['id'])
 		email = json_content['data']['personEmail']
 
-		person = webex_person(email)
-		
-		Persons.append(person)
+		person = getPerson(Persons, email)
+		if person == None:
+			person = webex_person(email)
+			person.port = ports.pop()
+			Persons.append(person)
 
-		print ('Create a container!')
+			createContainer(person.port)
+			#sendMsg(person.email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
+		else:
 
-		sendMsg(person.email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
+
+			forwardApi(json_content, person.port)
+
+	
+
+		#sendMsg(person.email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
 
 
 

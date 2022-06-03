@@ -127,67 +127,110 @@ def index():
 	global   Persons
 	json_content = request.json
 
-	if json_content['data']['personEmail'] == 'sudng-test@webex.bot':
-		print ('My own msg; go to sleep')
-	else:
-		print ('real msg')
-		msg = getMsg(json_content['data']['id'])
-		email = json_content['data']['personEmail']
+	print ('real msg')
+	msg = getMsg(json_content['data']['id'])
+	email = json_content['data']['personEmail']
 
-		person = getPerson(Persons, email)
+	person = getPerson(Persons, email)
 
-		if person == None:
-			person = webex_person(email)
-			Persons.append(person)
-			sendMsg(person.email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
-			return "OK"
+	if person == None:
+		person = webex_person(email)
+		Persons.append(person)
+		person.Questions = getQuestions()
+		sendMsg(person.email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
+		return "OK"
 
+	if len(person.Questions) == 0 :
+		person.Questions = getQuestions()
+		person.AskQues = 1
 
-		if len(person.Questions) == 0 and 'yes' in msg:
-			person.Questions = getQuestions()
-			person.AskQues = 1
+	while len(person.Questions)>0:
+		print ('inside while')
 
-		elif len (person.Questions) == 0 and 'no' in msg:
-			sendMsg(person.email, 'Bye!' )
-			return "OK"
+		if person.AskQues == 1 :
+			print ('am here!')
+			sendMsg(person.email, person.Questions[0][0] )
+			sendMsg(person.email, person.Questions[0][1])
+			person.AskQues = 0
+			break
 
-		elif (len(person.Questions)>0 and 'no' in msg) or ('Quit' in msg or 'quit' in msg):
-			sendMsg(person.email, 'Bye!' )
-			return "OK"
+		elif  person.AskQues == 0:
+			print ('elif?')
+			if msg == person.Questions[0][2]:
+				sendMsg(person.email, 'That is right!' )
+				del(person.Questions[0])
+				person.AskQues = 1
 
-		elif 'start' in msg or 'Start' in msg:
-			print ('here!!')
-
-			person.Questions = getQuestions()
-			person.AskQues = 1
-
-
-		while len(person.Questions)>0:
-			print ('inside while')
-
-			if person.AskQues == 1 :
-				print ('am here!')
-				sendMsg(person.email, person.Questions[0][0] )
-				sendMsg(person.email, person.Questions[0][1])
-				person.AskQues = 0
-				break
-
-			elif  person.AskQues == 0:
-				print ('elif?')
-				if msg == person.Questions[0][2]:
-					sendMsg(person.email, 'That is right!' )
-					del(person.Questions[0])
-					person.AskQues = 1
-
-				else:
-					person.AskQues = 1
-					sendMsg(person.email, 'Sorry! Right answer is '+person.Questions[0][2] )
-					del(person.Questions[0])
+			else:
+				person.AskQues = 1
+				sendMsg(person.email, 'Sorry! Right answer is '+person.Questions[0][2] )
+				del(person.Questions[0])
 
 
 
-		if len (person.Questions) == 0 and 'yes' not in msg:
-			sendMsg(person.email, 'Do you want to start again?')
+
+
+	# if json_content['data']['personEmail'] == 'sudng-test@webex.bot':
+	# 	print ('My own msg; go to sleep')
+	# else:
+	# 	print ('real msg')
+	# 	msg = getMsg(json_content['data']['id'])
+	# 	email = json_content['data']['personEmail']
+
+	# 	person = getPerson(Persons, email)
+
+	# 	if person == None:
+	# 		person = webex_person(email)
+	# 		Persons.append(person)
+	# 		sendMsg(person.email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
+	# 		return "OK"
+
+
+	# 	if len(person.Questions) == 0 and 'yes' in msg:
+	# 		person.Questions = getQuestions()
+	# 		person.AskQues = 1
+
+	# 	elif len (person.Questions) == 0 and 'no' in msg:
+	# 		sendMsg(person.email, 'Bye!' )
+	# 		return "OK"
+
+	# 	elif (len(person.Questions)>0 and 'no' in msg) or ('Quit' in msg or 'quit' in msg):
+	# 		sendMsg(person.email, 'Bye!' )
+	# 		return "OK"
+
+	# 	elif 'start' in msg or 'Start' in msg:
+	# 		print ('here!!')
+
+	# 		person.Questions = getQuestions()
+	# 		person.AskQues = 1
+
+
+	# 	while len(person.Questions)>0:
+	# 		print ('inside while')
+
+	# 		if person.AskQues == 1 :
+	# 			print ('am here!')
+	# 			sendMsg(person.email, person.Questions[0][0] )
+	# 			sendMsg(person.email, person.Questions[0][1])
+	# 			person.AskQues = 0
+	# 			break
+
+	# 		elif  person.AskQues == 0:
+	# 			print ('elif?')
+	# 			if msg == person.Questions[0][2]:
+	# 				sendMsg(person.email, 'That is right!' )
+	# 				del(person.Questions[0])
+	# 				person.AskQues = 1
+
+	# 			else:
+	# 				person.AskQues = 1
+	# 				sendMsg(person.email, 'Sorry! Right answer is '+person.Questions[0][2] )
+	# 				del(person.Questions[0])
+
+
+
+	# 	if len (person.Questions) == 0 and 'yes' not in msg:
+	# 		sendMsg(person.email, 'Do you want to start again?')
 
 
 
