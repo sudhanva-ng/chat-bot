@@ -7,6 +7,7 @@ import random
 import os
 import subprocess, sys, time
 from pyngrok import ngrok
+import time
 
 app = Flask(__name__)
 app.debug = False
@@ -70,8 +71,8 @@ def createContainer(name, port):
 	p = subprocess.Popen('ssh -i /root/chat-bot.pem ubuntu@172.17.0.1 '+ cmd, shell=True, stderr=subprocess.PIPE)
 
 	print('Container {} is created!'.format(name))
-	p = subprocess.Popen('ssh -i /root/chat-bot.pem ubuntu@172.17.0.1 '+ 'sudo docker ps', shell=True, stderr=subprocess.PIPE)
-	print(p.stderr.read(1))
+
+	time.sleep(1)
 
 	cmd = "sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' {}".format(name)
 	p = subprocess.Popen('ssh -i /root/chat-bot.pem ubuntu@172.17.0.1 '+ cmd, shell=True, stderr=subprocess.PIPE)
