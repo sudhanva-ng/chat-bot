@@ -65,7 +65,7 @@ def forwardApi(json_content, port):
 	response = requests.post(url=apiUrl, json=json_content)
 
 def createContainer(port):
-	p = subprocess.Popen('sudo docker ', shell=True, stderr=subprocess.PIPE)
+	p = subprocess.Popen('sudo docker run -d -p {}:{} -e CONT_PORT={} chat-bot'.format(port, port, port), shell=True, stderr=subprocess.PIPE)
 
 
 @app.route('/', methods=['POST'])
