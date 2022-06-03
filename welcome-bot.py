@@ -89,7 +89,7 @@ def index():
 
 			createContainer(person.port)
 			print('New person! Creating contianer!')
-			#sendMsg(person.email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
+			sendMsg(person.email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
 		else:
 
 			print('Found person, Forwarding api')
