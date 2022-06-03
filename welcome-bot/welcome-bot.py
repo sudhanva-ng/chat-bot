@@ -88,7 +88,12 @@ def createContainer(name, port):
 
 	print('Container created with name {}'.format(name))
 
-	
+	time.sleep(2)
+
+	cmd = "sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' {}".format(name)
+	out = check_output((base + cmd).split())
+	print('!!' + out)
+	return out
 
 
 
@@ -113,7 +118,7 @@ def index():
 			sendMsg(person.email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
 
 			person.ip = createContainer(person.container, person.port)
-			print('New person! Creating contianer!')
+			print('New person! Creating contianer with IP!'.format(person.ip))
 			
 		else:
 
