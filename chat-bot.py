@@ -10,10 +10,9 @@ from pyngrok import ngrok
 
 app = Flask(__name__)
 app.debug = False
-if '-d' in sys.argv:
-	port = int(os.environ.get("PORT", 5000))
-else:
-	port = int(os.environ.get("PORT", 80))
+
+
+port = os.getenv("CONT_PORT")
 
 print('port! + {}'.format(port))
 
