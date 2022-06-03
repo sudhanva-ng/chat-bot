@@ -93,7 +93,7 @@ def createContainer(name, port):
 	cmd = "sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' {}".format(name)
 	out = check_output((base + cmd).split())
 	out = out.decode('utf-8')
-	print('!!' + out)
+	
 	return out
 
 
