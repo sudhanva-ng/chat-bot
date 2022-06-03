@@ -92,7 +92,7 @@ def createContainer(name, port):
 
 	cmd = "sudo docker inspect {} | grep IP | grep -m 1 172 | cut -d ':' -f2".format(name)
 	out = check_output((base + cmd).split())
-	out = out.decode('utf-8')
+	out = out.decode('utf-8').strip()
 
 	
 	out = out.replace('"', '')
