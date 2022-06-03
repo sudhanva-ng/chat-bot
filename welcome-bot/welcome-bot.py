@@ -74,7 +74,7 @@ def createContainer(name, port):
 
 	time.sleep(1)
 
-	cmd = "sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' {}".format(name)
+	cmd = "sudo docker inspect -f \'{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}\' {}".format(name)
 	p = subprocess.Popen('ssh -i /root/chat-bot.pem ubuntu@172.17.0.1 '+ cmd, shell=True, stderr=subprocess.PIPE)
 	out = p.stderr.read().decode("utf-8")
 	print('IP!!'+out)
