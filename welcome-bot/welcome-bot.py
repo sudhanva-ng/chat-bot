@@ -90,10 +90,15 @@ def createContainer(name, port):
 
 	time.sleep(2)
 
-	cmd = "sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' {}".format(name)
+	cmd = "sudo docker inspect {} | grep IP | grep -m 1 172 | cut -d ':' -f2".format(name)
 	out = check_output((base + cmd).split())
 	out = out.decode('utf-8')
+
 	
+	out = out.replace('"', '')
+	out = out.replace(',', '')
+	print('!!!!!'+out)
+
 	return out
 
 
