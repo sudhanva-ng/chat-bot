@@ -60,15 +60,24 @@ def getMsg(msgId):
 		#print (type(out))
 		return(out['text'])
 
-def forwardApi(json_content, port):
-	apiUrl = "http://localhost:{}".format(port)
+def forwardApi(ip, json_content, port):
+	apiUrl = "http://{}:{}".format(ip,port)
 	response = requests.post(url=apiUrl, json=json_content)
 
-def createContainer(port):
+def createContainer(name, port):
 	#p = subprocess.Popen('sudo docker run -d -p {}:{} -e CONT_PORT={} chat-bot'.format(port, port, port), shell=True, stderr=subprocess.PIPE)
-	cmd = 'sudo docker run -d -p {}:{} -e CONT_PORT={} chat-bot'.format(port, port, port)
+	cmd = 'sudo docker run -d -p {}:{} -e CONT_PORT={} --name {} chat-bot'.format(port, port, port, name)
 	p = subprocess.Popen('ssh -i /root/chat-bot.pem ubuntu@172.17.0.1 '+ cmd, shell=True, stderr=subprocess.PIPE)
 
+	print('Container {} is created!'.format(name))
+	p = subprocess.Popen('ssh -i /root/chat-bot.pem ubuntu@172.17.0.1 '+ 'sudo docker ps', shell=True, stderr=subprocess.PIPE)
+	print(p.stderr.read(1))
+
+	cmd = "sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' {}".format(name)
+	p = subprocess.Popen('ssh -i /root/chat-bot.pem ubuntu@172.17.0.1 '+ cmd, shell=True, stderr=subprocess.PIPE)
+	out = p.stderr.read(1)
+	print('IP!!'+out)
+	return (out)
 
 
 @app.route('/', methods=['POST'])
@@ -89,13 +98,15 @@ def index():
 			person.port = ports.pop()
 			Persons.append(person)
 
-			createContainer(person.port)
-			print('New person! Creating contianer!')
 			sendMsg(person.email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
+
+			person.ip = createContainer(person.container, person.port)
+			print('New person! Creating contianer!')
+			
 		else:
 
 			print('Found person, Forwarding api')
-			forwardApi(json_content, person.port)
+			forwardApi(person.ip, json_content, person.port)
 
 	
 
