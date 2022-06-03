@@ -78,7 +78,8 @@ def index():
 	else:
 		print ('real msg')
 		msg = getMsg(json_content['data']['id'])
-		email = json_content['data']['personEmail']
+		#email = json_content['data']['personEmail']
+		email = 'sudhanva.ng@gmail.com'
 
 		person = getPerson(Persons, email)
 		if person == None:
