@@ -65,7 +65,10 @@ def forwardApi(json_content, port):
 	response = requests.post(url=apiUrl, json=json_content)
 
 def createContainer(port):
-	p = subprocess.Popen('sudo docker run -d -p {}:{} -e CONT_PORT={} chat-bot'.format(port, port, port), shell=True, stderr=subprocess.PIPE)
+	#p = subprocess.Popen('sudo docker run -d -p {}:{} -e CONT_PORT={} chat-bot'.format(port, port, port), shell=True, stderr=subprocess.PIPE)
+	cmd = 'sudo docker run -d -p {}:{} -e CONT_PORT={} chat-bot'.format(port, port, port)
+	p = subprocess.Popen('ssh -i /root/chat-bot.pem ubuntu@172.17.0.1 '+ cmd, shell=True, stderr=subprocess.PIPE)
+
 
 
 @app.route('/', methods=['POST'])
