@@ -93,8 +93,7 @@ def killContainer(name):
 	cmd = 'sudo docker kill {}'.format(name)
 	out = check_output((base + cmd).split())
 
-
-
+	cmd = 'sudo docker rm -f {}'.format(name)
 
 
 @app.route('/', methods=['POST'])
