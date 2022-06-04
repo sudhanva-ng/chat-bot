@@ -8,4 +8,5 @@
       name: welcome-bot:latest
       build:
         path: ../welcome-bot/ 
-      source: build
+        source: build
+      state: present
