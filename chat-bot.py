@@ -138,12 +138,6 @@ def index():
 		person.Questions = getQuestions()
 		sendMsg(person.email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
 		return "OK"
-
-	if len(person.Questions) == 0 :
-		person.Questions = getQuestions()
-		sendMsg(perso.email, 'Well done! Your score is {}!'.format(person.score))
-		person.score = 0
-		sendMsg(perso.email, "Reply 'start' to continue, 'stop' to end")
 		
 
 
@@ -169,6 +163,12 @@ def index():
 				person.AskQues = 1
 				sendMsg(person.email, 'Sorry! Right answer is {}. Your score is {}'.format(person.Questions[0][2], person.score) )
 				del(person.Questions[0])
+
+			if len(person.Questions) == 0 :
+				person.Questions = getQuestions()
+				sendMsg(perso.email, 'Well done! Your final score is {}!'.format(person.score))
+				person.score = 0
+				sendMsg(perso.email, "Reply 'start' to start again, 'stop' to end") 
 
 
 
