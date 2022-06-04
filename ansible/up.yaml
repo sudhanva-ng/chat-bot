@@ -1,0 +1,7 @@
+---
+ - name: Build quiz-bot
+   hosts: localhost
+
+   tasks:
+   - name: test
+     ansible.builtin.command:ls
