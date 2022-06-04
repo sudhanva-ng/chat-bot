@@ -3,5 +3,8 @@
    hosts: localhost
 
    tasks:
-   - name: test
-     ansible.builtin.command: ls
+   - name: Build welcome-bot
+     community.docker.docker_image:
+       name: welcome-bot:latest
+       build:
+        path: ../welcome-bot/ 
