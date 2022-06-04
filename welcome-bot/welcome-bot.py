@@ -90,10 +90,10 @@ def createContainer(name, port):
 def killContainer(name):
 	global ports
 	base = 'ssh -i /root/chat-bot.pem ubuntu@172.17.0.1 '
-	cmd = 'sudo docker kill {}'.format(name)
+	cmd = 'sudo docker rm -f {}'.format(name)
 	out = check_output((base + cmd).split())
 
-	cmd = 'sudo docker rm -f {}'.format(name)
+	#cmd = 'sudo docker rm -f {}'.format(name)
 
 
 @app.route('/', methods=['POST'])
