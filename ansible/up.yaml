@@ -5,6 +5,7 @@
    tasks:
    - name: Build welcome-bot
      community.docker.docker_image:
-       name: welcome-bot:latest
-       build:
+      name: welcome-bot:latest
+      build:
         path: ../welcome-bot/ 
+      source: build
