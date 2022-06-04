@@ -168,7 +168,8 @@ def index():
 				person.Questions = getQuestions()
 				sendMsg(person.email, 'Well done! Your final score is {}!'.format(person.score))
 				person.score = 0
-				sendMsg(person.email, "Reply 'start' to start again, 'stop' to end") 
+				sendMsg(person.email, "Reply 'start' to start again, 'stop' to end")
+				break 
 
 
 

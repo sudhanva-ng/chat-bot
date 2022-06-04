@@ -119,16 +119,19 @@ def index():
 
 			person.ip = createContainer(person.container, person.port)
 			print('New person! Creating contianer with IP!'.format(person.ip))
+			forwardApi(person.ip, json_content, person.port)
 
 		elif 'stop' in msg or 'Stop' in msg:
 			sendMsg(person.email,  'Thank you for playing, bye!')
-			killContainer(person.name)
+			killContainer(person.container)
 
-			ports.append(pers.port)
+			ports.append(person.port)
 			Persons.remove(person)
 			Print('Container cleaned up!')
+
 		
-		forwardApi(person.ip, json_content, person.port)
+		else:
+			forwardApi(person.ip, json_content, person.port)
 
 	
 
