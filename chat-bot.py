@@ -95,7 +95,7 @@ def getQuestions():
 
 	Questions = []
 	url = 'https://opentdb.com/api.php'
-	param = {'amount': '5', 'type':'multiple', 'category':'17'}
+	param = {'amount': '3', 'type':'multiple', 'category':'17'}
 
 	response = requests.get(url=url, params=param)
 	out = json.loads(response.text)
@@ -141,7 +141,11 @@ def index():
 
 	if len(person.Questions) == 0 :
 		person.Questions = getQuestions()
-		person.AskQues = 1
+		sendMsg(perso.email, 'Well done! Your score is {}!'.format(person.score))
+		person.score = 0
+		sendMsg(perso.email, "Reply 'start' to continue, 'stop' to end")
+		
+
 
 	while len(person.Questions)>0:
 		print ('inside while')
@@ -156,13 +160,14 @@ def index():
 		elif  person.AskQues == 0:
 			print ('elif?')
 			if msg == person.Questions[0][2]:
-				sendMsg(person.email, 'That is right!' )
+				person.score+=1
+				sendMsg(person.email, 'That is the right Answer! Your score is {}'.format(person.score) )
 				del(person.Questions[0])
 				person.AskQues = 1
 
 			else:
 				person.AskQues = 1
-				sendMsg(person.email, 'Sorry! Right answer is '+person.Questions[0][2] )
+				sendMsg(person.email, 'Sorry! Right answer is {}. Your score is {}'.format(person.Questions[0][2], person.score) )
 				del(person.Questions[0])
 
 

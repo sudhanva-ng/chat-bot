@@ -5,6 +5,7 @@ class webex_person:
 		self.email = email
 		self.Questions = []
 		self.AskQues = 1
+		self.score = 0
 		
 
 

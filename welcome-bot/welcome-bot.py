@@ -67,20 +67,6 @@ def forwardApi(ip, json_content, port):
 	response = requests.post(url=apiUrl, json=json_content)
 
 def createContainer(name, port):
-	# p = subprocess.Popen('sudo docker run -d -p {}:{} -e CONT_PORT={} chat-bot'.format(port, port, port), shell=True, stderr=subprocess.PIPE)
-	
-	# cmd = 'sudo docker run -d -p {}:{} -e CONT_PORT={} --name {} chat-bot'.format(port, port, port, name)
-	# p = subprocess.Popen('ssh -i /root/chat-bot.pem ubuntu@172.17.0.1 '+ cmd, shell=True, stderr=subprocess.PIPE)
-
-	# print('Container {} is created!'.format(name))
-
-	# time.sleep(10)
-
-	# cmd = "sudo docker inspect -f \'{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}\' {}".format(name)
-	# p = subprocess.Popen('ssh -i /root/chat-bot.pem ubuntu@172.17.0.1 '+ cmd, shell=True, stderr=subprocess.PIPE)
-	# out = p.stderr.read().decode("utf-8")
-	# print('IP!!'+out)
-	# return (out)
 
 	base = 'ssh -i /root/chat-bot.pem ubuntu@172.17.0.1 '
 	cmd = 'sudo docker run -d -p {}:{} -e CONT_PORT={} --name {} chat-bot'.format(port, port, port, name)
@@ -100,6 +86,14 @@ def createContainer(name, port):
 	print('!!!!!'+out)
 
 	return out
+
+def killContainer(name):
+	global ports
+	base = 'ssh -i /root/chat-bot.pem ubuntu@172.17.0.1 '
+	cmd = 'sudo docker kill {}'.format(name)
+	out = check_output((base + cmd).split())
+
+
 
 
 
@@ -125,7 +119,14 @@ def index():
 
 			person.ip = createContainer(person.container, person.port)
 			print('New person! Creating contianer with IP!'.format(person.ip))
-			
+
+		elif 'stop' in msg or 'Stop' in msg:
+			sendMsg(person.email,  'Thank you for playing, bye!')
+			killContainer(person.name)
+
+			ports.append(pers.port)
+			Persons.remove(person)
+			Print('Container cleaned up!')
 		
 		forwardApi(person.ip, json_content, person.port)
 
