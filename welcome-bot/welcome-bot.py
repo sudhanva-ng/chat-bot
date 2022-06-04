@@ -127,7 +127,7 @@ def index():
 
 			ports.append(person.port)
 			Persons.remove(person)
-			Print('Container cleaned up!')
+			print('Container cleaned up!')
 
 		
 		else:
