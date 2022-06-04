@@ -4,4 +4,4 @@
 
    tasks:
    - name: test
-     ansible.builtin.command:ls
+     ansible.builtin.command: ls
