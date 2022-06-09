@@ -69,7 +69,7 @@ def forwardApi(ip, json_content, port):
 def createContainer(name, port):
 
 	base = 'ssh -i /root/chat-bot.pem ubuntu@172.17.0.1 '
-	cmd = 'sudo docker run -d -p {}:{} -e CONT_PORT={} --name {} chat-bot'.format(port, port, port, name)
+	cmd = 'sudo docker run -d -p {}:{} -e CONT_PORT={} --name {} worker-bot'.format(port, port, port, name)
 	out = check_output((base + cmd).split())
 
 	print('Container created with name {}'.format(name))
