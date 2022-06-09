@@ -8,6 +8,26 @@
       build:
         path: /home/ubuntu/chat-bot/welcome-bot
         dockerfile: Dockerfile
-      name: quiz-bot
+      name: welcome-bot
       source: build
       state: present
+
+   - name: Build worker-bot
+     docker_image:
+      build:
+        path: /home/ubuntu/chat-bot/worker-bot
+        dockerfile: Dockerfile
+      name: worker-bot
+      source: build
+      state: present
+
+   - name: Run welcome-bot
+     docker:
+      name: welcome-bot
+      image: welcome-bot
+      expose: 
+      - 80
+      volumes:
+      - /home/ubuntu/chat-bot/utils:/root
+
+
