@@ -1,6 +1,5 @@
-# webex-chat-bot for heroku
+# webex-chat-bot for aws using ansible and containers
 
-1. heroku login
-2. heroku container:login
-3. heroku container:push web --app <>
-4. heroku container:release web --app <>
+1. git clone <>
+2. cd chat-bot/ansible
+3. sudo ansible-playbook up.yaml
