@@ -22,10 +22,10 @@
       state: present
 
    - name: Run welcome-bot
-     docker:
+     docker_container:
       name: welcome-bot
       image: welcome-bot
-      expose: 
+      exposed_ports: 
       - 80
       volumes:
       - /home/ubuntu/chat-bot/utils:/root
