@@ -1,5 +1,5 @@
 # webex-chat-bot for heroku
 
-git clone <>
-cd chat-bot/ansible
-sudo ansible-playbook up.yaml
+1. git clone https://github.com/sudhanva-ng/chat-bot.git
+2. cd chat-bot/ansible
+3. sudo ansible-playbook up.yaml
