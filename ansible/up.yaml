@@ -4,10 +4,10 @@
 
    tasks:
    - name: Build welcome-bot
-     community.docker.docker_image:
-      name: welcome-bot:latest
+     docker_image:
       build:
-        path: ../welcome-bot/
+        path: /home/ubuntu/chat-bot/welcome-bot
         dockerfile: Dockerfile
+      name: quiz-bot
       source: build
       state: present
