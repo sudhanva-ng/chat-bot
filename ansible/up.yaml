@@ -6,7 +6,7 @@
    - name: Build welcome-bot
      docker_image:
       build:
-        path: /home/ubuntu/chat-bot/welcome-bot
+        path: ../welcome-bot
         dockerfile: Dockerfile
       name: welcome-bot
       source: build
@@ -15,7 +15,7 @@
    - name: Build worker-bot
      docker_image:
       build:
-        path: /home/ubuntu/chat-bot/worker-bot
+        path: ../worker-bot
         dockerfile: Dockerfile
       name: worker-bot
       source: build
@@ -28,6 +28,6 @@
       ports: 
       - "80:80"
       volumes:
-      - /home/ubuntu/chat-bot/utils:/root
+      - ../utils:/root
 
 
