@@ -16,7 +16,7 @@ app.debug = False
 if '-d' in sys.argv:
 	port = int(os.environ.get("PORT", 5000))
 else:
-	port = int(os.environ.get("PORT", 80))
+	port = int(os.environ.get("PORT", 8080))
 
 print('port! + {}'.format(port))
 
