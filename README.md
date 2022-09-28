@@ -1,2 +1,4 @@
- # webex-chat-bot for heroku
+ # webex-chat-bot for local
+ 
+ ansible-playbook ansible/up.yaml
 
