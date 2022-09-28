@@ -21,13 +21,52 @@
       source: build
       state: present
 
+   - name: Build ngrok
+     docker_image:
+      build:
+        path: ../init
+        dockerfile: Dockerfile
+      name: ngrok
+      source: build
+      state: present      
+
+   - name: Create db network
+     docker_network:
+      name: db
+      ipam_config:
+      - subnet: '10.10.10.0/24'
+
+   - name: Run ngrok
+     docker_container:
+      name: ngrok
+      image: ngrok
+      networks:
+        - name: db 
+   # - name: Run ngrok python
+   #   script: ../init/ngrok.py 
+
    - name: Run welcome-bot
      docker_container:
       name: welcome-bot
       image: welcome-bot
+      networks:
+        - name: db
+          ipv4_address: "10.10.10.5"
       ports: 
-      - "8080:8080"
+      - "5000:5000"
       volumes:
       - ../utils:/root
+
+   - name: Run mongodb
+     docker_container:
+      name: mongodb
+      image: mongo
+      networks:
+        - name: db
+          ipv4_address: "10.10.10.10"
+      ports: 
+      - "27017:27017"
+
+
 
 

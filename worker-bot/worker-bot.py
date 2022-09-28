@@ -1,12 +1,12 @@
 from flask import Flask, request
 import json
 import requests
-import csv
 from webex_person import webex_person
+from mdb import mdb
 import random
 import os
 import subprocess, sys, time
-from pyngrok import ngrok
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 app.debug = False
@@ -34,36 +34,6 @@ def getPerson(Persons, email):
 
 	return None
 
-def createWebhook(url):
-	apiUrl = 'https://webexapis.com/v1/webhooks'
-	queryParams = {'name':'test', 'targetUrl':url, 'resource':'messages', 'event':'created'}
-	response = requests.post(url=apiUrl, json=queryParams, headers=httpHeaders)
-	print('Success!')
-	print (response.status_code)
-	print(response.text)
-
-def runNgrok():
-# 	p = subprocess.Popen('ngrok http 5000', shell=True, stderr=subprocess.PIPE)
-# 	print ('hi')
- 
-# ## But do not wait till netstat finish, start displaying output immediately ##
-# 	while True:
-# 		out = p.stderr.read(1)
-# 		if out == '' and p.poll() != None:
-# 			break
-# 		if out != '':
-# 			#sys.stdout.write(out)
-# 			print('!'+out)
-# 			#sys.stdout.flush()
-
-# 		if 'Forwarding' in out:
-# 			url = re.search('Forwarding\s*(http.*)\s->')
-# 			print (url)
-# 			break
-
-	public_url = ngrok.connect(5000,'http')
-	return (public_url)
-
 def sendMsg(to, msg):
 	global access_token, httpHeaders
 	apiUrl = "https://webexapis.com/v1/messages"
@@ -71,8 +41,8 @@ def sendMsg(to, msg):
 
 	response = requests.post(url=apiUrl, json=queryParams, headers=httpHeaders)
 
-	print (response.status_code)
-	print (response.text)
+	# print (response.status_code)
+	# print (response.text)
 
 	if response.status_code == 400:
 		print(msg)
@@ -95,7 +65,7 @@ def getQuestions():
 
 	Questions = []
 	url = 'https://opentdb.com/api.php'
-	param = {'amount': '3', 'type':'multiple', 'category':'17'}
+	param = {'amount': '10', 'type':'multiple', 'category':'17'}
 
 	response = requests.get(url=url, params=param)
 	out = json.loads(response.text)
@@ -110,16 +80,14 @@ def getQuestions():
 			opt = '\n'.join(opt)
 
 			ans = questions['correct_answer']
-
+			ques = BeautifulSoup(ques).get_text(ques)
+			opt = BeautifulSoup(opt).get_text(opt)
+			ans = BeautifulSoup(ans).get_text(ans)
 			Questions.append([ques, opt, ans])
 
 		return (Questions)
 
 
-@app.route('/', methods=['GET'])
-def test():
-	print ('Hello!!!!')
-	return "OK"
 
 @app.route('/', methods=['POST'])
 def index():
@@ -130,113 +98,108 @@ def index():
 	msg = getMsg(json_content['data']['id'])
 	email = json_content['data']['personEmail']
 
-	person = getPerson(Persons, email)
+	db_name = email.replace('.com','')
+	db_name = db_name.replace('.','')
+	db_name = db_name.replace('@','')
 
-	if person == None:
-		person = webex_person(email)
-		Persons.append(person)
-		person.Questions = getQuestions()
-		sendMsg(person.email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
-		return "OK"
+	person_handler = mdb(db_name)
+
+	out = person_handler.read()
+
+	if not out:
+			ques = getQuestions()
+			data = {'person':email, 'questions':ques,'state':'new','score':0 }
+			person_handler.write(data)
+			sendMsg(email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
+	else:
+		if msg == 'stop' or msg == 'Stop' or msg == 'quit' or msg == 'Stop':
+			sendMsg(email,  'Thank you for playing, bye!')
+			person_handler.deleteCollection()
+			return "OK"
+
+		if out['state'] == 'new':
+			print('new', flush=True)
+			question = out['questions']
+			curr = question.pop()
+			sendMsg(email, curr[0])
+			sendMsg(email, curr[1])
+			data = {'questions':question, 'state':'asked', 'ans':curr[2]}
+			person_handler.update(data)
+
+		elif out['state'] == 'asked':
+			print('asked', flush=True)
+			score = out['score']
+			if msg == out['ans']:
+				score+=1
+				sendMsg(email,  'That is right! Your current score is {}'.format(score))
+			else:
+				sendMsg(email,  'Sorry, the right answer is {}. Your current score is {}'.format(out['ans'],score))
+
+			question = out['questions']
+			if len(question) != 0:
+				curr = question.pop()
+				sendMsg(email, curr[0])
+				sendMsg(email, curr[1])
+				data = {'questions':question, 'state':'asked', 'ans':curr[2], 'score':score}
+				person_handler.update(data)
+			else:
+				sendMsg(email, 'Good job! You scored {}. Do you want to go again? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime'.format(score))
+				ques = getQuestions()
+				data = {'person':email, 'questions':ques,'state':'new','score':0 }
+				person_handler.update(data)
+				
+
+
+		
+		# person = getPerson(Persons, email)
+		# person_handler.updatePerson(email)
+
+
+
+
+
+
+
+	# person = getPerson(Persons, email)
+
+	# if person == None:
+	# 	person = webex_person(email)
+	# 	Persons.append(person)
+	# 	person.Questions = getQuestions()
+	# 	sendMsg(person.email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
+	# 	return "OK"
 		
 
 
-	while len(person.Questions)>0:
-		print ('inside while')
+	# while len(person.Questions)>0:
+	# 	print ('inside while')
 
-		if person.AskQues == 1 :
-			print ('am here!')
-			sendMsg(person.email, person.Questions[0][0] )
-			sendMsg(person.email, person.Questions[0][1])
-			person.AskQues = 0
-			break
+	# 	if person.AskQues == 1 :
+	# 		print ('am here!')
+	# 		sendMsg(person.email, person.Questions[0][0] )
+	# 		sendMsg(person.email, person.Questions[0][1])
+	# 		person.AskQues = 0
+	# 		break
 
-		elif  person.AskQues == 0:
-			print ('elif?')
-			if msg == person.Questions[0][2]:
-				person.score+=1
-				sendMsg(person.email, 'That is the right Answer! Your score is {}'.format(person.score) )
-				del(person.Questions[0])
-				person.AskQues = 1
+	# 	elif  person.AskQues == 0:
+	# 		print ('elif?')
+	# 		if msg == person.Questions[0][2]:
+	# 			person.score+=1
+	# 			sendMsg(person.email, 'That is the right Answer! Your score is {}'.format(person.score) )
+	# 			del(person.Questions[0])
+	# 			person.AskQues = 1
 
-			else:
-				person.AskQues = 1
-				sendMsg(person.email, 'Sorry! Right answer is {}. Your score is {}'.format(person.Questions[0][2], person.score) )
-				del(person.Questions[0])
+	# 		else:
+	# 			person.AskQues = 1
+	# 			sendMsg(person.email, 'Sorry! Right answer is {}. Your score is {}'.format(person.Questions[0][2], person.score) )
+	# 			del(person.Questions[0])
 
-			if len(person.Questions) == 0 :
-				person.Questions = getQuestions()
-				sendMsg(person.email, 'Well done! Your final score is {}!'.format(person.score))
-				person.score = 0
-				sendMsg(person.email, "Reply 'start' to start again, 'stop' to end")
-				break 
-
-
-
-
-
-	# if json_content['data']['personEmail'] == 'sudng-test@webex.bot':
-	# 	print ('My own msg; go to sleep')
-	# else:
-	# 	print ('real msg')
-	# 	msg = getMsg(json_content['data']['id'])
-	# 	email = json_content['data']['personEmail']
-
-	# 	person = getPerson(Persons, email)
-
-	# 	if person == None:
-	# 		person = webex_person(email)
-	# 		Persons.append(person)
-	# 		sendMsg(person.email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
-	# 		return "OK"
-
-
-	# 	if len(person.Questions) == 0 and 'yes' in msg:
-	# 		person.Questions = getQuestions()
-	# 		person.AskQues = 1
-
-	# 	elif len (person.Questions) == 0 and 'no' in msg:
-	# 		sendMsg(person.email, 'Bye!' )
-	# 		return "OK"
-
-	# 	elif (len(person.Questions)>0 and 'no' in msg) or ('Quit' in msg or 'quit' in msg):
-	# 		sendMsg(person.email, 'Bye!' )
-	# 		return "OK"
-
-	# 	elif 'start' in msg or 'Start' in msg:
-	# 		print ('here!!')
-
-	# 		person.Questions = getQuestions()
-	# 		person.AskQues = 1
-
-
-	# 	while len(person.Questions)>0:
-	# 		print ('inside while')
-
-	# 		if person.AskQues == 1 :
-	# 			print ('am here!')
-	# 			sendMsg(person.email, person.Questions[0][0] )
-	# 			sendMsg(person.email, person.Questions[0][1])
-	# 			person.AskQues = 0
-	# 			break
-
-	# 		elif  person.AskQues == 0:
-	# 			print ('elif?')
-	# 			if msg == person.Questions[0][2]:
-	# 				sendMsg(person.email, 'That is right!' )
-	# 				del(person.Questions[0])
-	# 				person.AskQues = 1
-
-	# 			else:
-	# 				person.AskQues = 1
-	# 				sendMsg(person.email, 'Sorry! Right answer is '+person.Questions[0][2] )
-	# 				del(person.Questions[0])
-
-
-
-	# 	if len (person.Questions) == 0 and 'yes' not in msg:
-	# 		sendMsg(person.email, 'Do you want to start again?')
-
+	# 		if len(person.Questions) == 0 :
+	# 			person.Questions = getQuestions()
+	# 			sendMsg(person.email, 'Well done! Your final score is {}!'.format(person.score))
+	# 			person.score = 0
+	# 			sendMsg(person.email, "Reply 'start' to start again, 'stop' to end")
+	# 			break 
 
 
 	return "OK"

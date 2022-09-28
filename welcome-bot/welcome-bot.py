@@ -1,29 +1,32 @@
 from flask import Flask, request
 import json
 import requests
-import csv
 from webex_person import webex_person
 import random
 import os
 import subprocess, sys, time
 from subprocess import check_output
-from pyngrok import ngrok
-import time
+import logging
 
 app = Flask(__name__)
 app.debug = False
+
+
 
 if '-d' in sys.argv:
 	port = int(os.environ.get("PORT", 5000))
 else:
 	port = int(os.environ.get("PORT", 8080))
 
+port = 5000
 print('port! + {}'.format(port))
 
 
 access_token = "M2FmNGNlZDItNDM3Yi00NGM2LTkxNjMtZjAwZGM2NzQ5NzczZjU2YWI5Y2MtNmYz_P0A1_16d45015-863d-4604-9bc8-b783b72ace5b"
 
 httpHeaders = {"Content-type" : "application/json", "Authorization" : "Bearer " + access_token}
+
+
 
 msg = 'Do you want to play a game?'
 msg_thankYou = 'Thank you; your response has been recorded'
@@ -66,17 +69,27 @@ def forwardApi(ip, json_content, port):
 	apiUrl = "http://{}:{}".format(ip,port)
 	response = requests.post(url=apiUrl, json=json_content)
 
+def getContainerIP(name):
+	base = 'ssh -o StrictHostKeychecking=no -i /root/chat-bot.pem ubuntu@172.17.0.1 '
+	cmd = "sudo docker inspect {} | grep IP | grep -m 1 10.10.10 | cut -d ':' -f2".format(name)
+	out = check_output((base + cmd).split())
+	out = out.decode('utf-8').strip()
+	out = out.replace('"', '')
+	out = out.replace(',', '')
+	print('Container IP {}'.format(out))
+	return out
+
 def createContainer(name, port):
 
 	base = 'ssh -o StrictHostKeychecking=no -i /root/chat-bot.pem ubuntu@172.17.0.1 '
-	cmd = 'sudo docker run -d -p {}:{} -e CONT_PORT={} --name {} worker-bot'.format(port, port, port, name)
+	cmd = 'sudo docker run -d -p {}:{} -e CONT_PORT={} --network=db --name {} worker-bot'.format(port, port, port, name)
 	out = check_output((base + cmd).split())
 
 	print('Container created with name {}'.format(name))
 
 	time.sleep(2)
 
-	cmd = "sudo docker inspect {} | grep IP | grep -m 1 172 | cut -d ':' -f2".format(name)
+	cmd = "sudo docker inspect {} | grep IP | grep -m 1 10.10.10 | cut -d ':' -f2".format(name)
 	out = check_output((base + cmd).split())
 	out = out.decode('utf-8').strip()
 
@@ -93,12 +106,18 @@ def killContainer(name):
 	cmd = 'sudo docker rm -f {}'.format(name)
 	out = check_output((base + cmd).split())
 
-	#cmd = 'sudo docker rm -f {}'.format(name)
+capacity = 1
+Containers = []
+container_count = 0
+
+order = -1
+
+
 
 
 @app.route('/', methods=['POST'])
 def index():
-	global   containers, ports
+	global   Containers, ports, capacity, container_count, order, Persons
 	json_content = request.json
 
 	if json_content['data']['personEmail'] == 'sudng-quiz-bot@webex.bot':
@@ -108,34 +127,39 @@ def index():
 		msg = getMsg(json_content['data']['id'])
 		email = json_content['data']['personEmail']
 
+
+		app.logger.info('Starting')
+
 		person = getPerson(Persons, email)
 		if person == None:
 			person = webex_person(email)
-			person.port = ports.pop()
 			Persons.append(person)
+			
+			if  container_count == 0 or  len(Persons) / container_count > capacity:
+				container_count+=1
+				port = ports.pop(-1)
+				name = 'worker{}'.format(container_count)
+				
+				ip = createContainer(name, port)
+				Containers.append( (name,ip,port) )
+				app.logger.info('Started Container')
+				print(Containers, flush=True)
 
-			#sendMsg(person.email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
 
-			person.ip = createContainer(person.container, person.port)
-			print('New person! Creating contianer with IP!'.format(person.ip))
-			forwardApi(person.ip, json_content, person.port)
-
-		elif 'stop' in msg or 'Stop' in msg:
-			sendMsg(person.email,  'Thank you for playing, bye!')
-			killContainer(person.container)
-
-			ports.append(person.port)
-			Persons.remove(person)
-			print('Container cleaned up!')
-
+		## For round-robin ##
+		order+=1
+		if order > len(Containers)-1:
+			order = 0
 		
-		else:
-			forwardApi(person.ip, json_content, person.port)
+		print(Containers)
+		ip = Containers[order][1]
+		port = Containers[order][2]
+		print(ip, flush=True)
+		print(port, flush=True)
+		app.logger.error('Before forwarding')
 
-	
-
-		#sendMsg(person.email,  'Hello! Do you want to play a game? Remeber I am just a yes/no bot but you can say "start" to startover or "quit" to end anytime')
-
+		forwardApi(ip, json_content, port)
+		app.logger.error('After forwarding')
 
 
 	return "OK"
@@ -143,10 +167,6 @@ def index():
 
 
 if __name__ == '__main__':
-
-	# url = runNgrok()
-	# print (url)
-	#createWebhook(sys.argv[-1])
 
 	app.run(host="0.0.0.0",port=port)
 
